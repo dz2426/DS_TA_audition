@@ -28,15 +28,28 @@ scale_fill_discrete = scale_fill_viridis_d
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
+# Import and tidy dataset
 ```{r}
 dog_import = readxl::read_excel("./data/dog_weights.xlsx") 
 
 dog_data = readxl::read_excel("./data/dog_weights.xlsx", skip = 2) %>% 
   janitor::clean_names() %>% 
-  mutate(weight_raisin_lbs = as.numeric(substr(raisin, 1, 2)) + as.numeric(substr(raisin, 3, 5))*0.0625,
+  mutate(date = janitor::excel_numeric_to_date(as.numeric(date)),
+         weight_raisin_lbs = as.numeric(substr(raisin, 1, 2)) + as.numeric(substr(raisin, 3, 5))*0.0625,
          weight_simone_lbs = as.numeric(substr(simone, 1, 2)) + as.numeric(substr(simone, 3, 5))*0.0625,
          weight_gagne_lbs = as.numeric(substr(gagne, 1, 2)) + as.numeric(substr(gagne, 3, 5))*0.0625,
-         date = janitor::excel_numeric_to_date(as.numeric(date))) %>% # unify units to pounds
-  select(date, 7:9) # select columns of interest
+         rer_raisin = ((weight_raisin_lbs*0.453592)^0.75)*70,
+         rer_simone = ((weight_simone_lbs*0.453592)^0.75)*70,
+         rer_gagne = ((weight_gagne_lbs*0.453592)^0.75)*70) %>% 
+  # Transfer all units into pounds
+  # RER stands for Resting Energy Requirement (18 lb dog = 339 cal), calculated based on the following source:
+  # https://vet.osu.edu/vmc/companion/our-services/nutrition-support-service/basic-calorie-calculator
+  select(date, 7:12) %>%  # Select columns of interest %>% 
+  drop_na(date) # Remove one observation without date information
+```
+
+# Plot
+```{r}
+
 ```
 
